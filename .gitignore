@@ -1,0 +1,11 @@
+
+*/.vscode/
+.vscode/
+
+*/.vs/
+.vs/
+
+*/build/
+build/
+STLSoft/
+*/STLSoft/
