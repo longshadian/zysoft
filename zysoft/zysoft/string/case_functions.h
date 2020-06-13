@@ -2,37 +2,25 @@
 
 #include <cctype>
 #include <algorithm>
+#include <string_view>
 
 namespace zysoft
 {
 
-/** Converts all characters in the string to upper case.
- *
- * \ingroup group__library__String
- */
 template <typename S>
 inline S& make_upper(S& s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), [](int c) { return static_cast<char>(::toupper(c)); });
+    std::transform(s.begin(), s.end(), s.begin(), [](auto c) { return ::toupper(c); });
     return s;
 }
 
-/** Converts all characters in the string to lower case.
- *
- * \ingroup group__library__String
- */
 template <typename S>
 inline S& make_lower(S& s)
 {
-    std::transform(s.begin(), s.end(), s.begin(), [](int c) { return static_cast<char>(::tolower(c)); });
+    std::transform(s.begin(), s.end(), s.begin(), [](int c) { return ::tolower(c); });
     return s;
 }
 
-/** Returns a copy of the source string in which all characters have
- *   been converted to upper case.
- *
- * \ingroup group__library__String
- */
 template <typename S>
 inline S to_upper(const S& s)
 {
@@ -41,11 +29,6 @@ inline S to_upper(const S& s)
     return r;
 }
 
-/** Returns a copy of the source string in which all characters have
- *   been converted to lower case.
- *
- * \ingroup group__library__String
- */
 template <typename S>
 inline S to_lower(const S& s)
 {
@@ -53,6 +36,12 @@ inline S to_lower(const S& s)
     make_lower(r);
     return r;
 }
+
+template <>
+inline std::string_view to_upper(const std::string_view&) = delete;
+
+template <>
+inline std::string_view to_lower(const std::string_view&) = delete;
 
 } // namespace zysoft
 

@@ -8,6 +8,8 @@
 #include "test_define.h"
 #include "log.h"
 
+#define TEST_CASE_NAME "timing wheel test"
+
 static void Test_TimingWheel1()
 {
     zysoft::timing_wheel<int, 10> tw;
@@ -51,7 +53,8 @@ static void Test_TimingWheel1()
     }
 }
 
-static void Test_TimingWheel2()
+static 
+void Test_TimingWheel2()
 {
     zysoft::timing_wheel<std::unique_ptr<int>, 10> tw;
 
@@ -97,14 +100,14 @@ static void Test_TimingWheel2()
     }
 }
 
-#if 1
-TEST_CASE("test timing wheel")
+#if 0
+TEST_CASE(TEST_CASE_NAME)
 {
-    PrintInfo("test timing wheel");
+    LogInfo << TEST_CASE_NAME;
     try {
         Test_TimingWheel2();
     } catch (const std::exception& e) {
-        std::cout << e.what() << "\n";
+        LogWarn << e.what();
         CHECK(false);
     }
 }

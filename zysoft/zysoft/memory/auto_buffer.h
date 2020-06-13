@@ -4,14 +4,11 @@
 #include <memory>
 #include <type_traits>
 
-
 #include <zysoft/zysoft/zysoft.h>
 #include <zysoft/zysoft/memory/util/allocator_selector.h>
 
 namespace zysoft
 {
-
-// TODO 
 
 template< typename T
         , std::size_t N = 256
@@ -39,41 +36,44 @@ public:
     typedef const reverse_iterator                  const_reverse_iterator;
 
     static_assert(std::is_pod_v<T>, "auto_buffer T must be POD!");
+    static_assert(N != 0, "auto_buffer N != 0");
 public:
 
     explicit    auto_buffer(size_type n);
                 ~auto_buffer();
 
                 auto_buffer(const class_type&) = delete;
+                auto_buffer(class_type&&) = delete;
     class_type& operator=(const class_type&) = delete;
+    class_type& operator=(class_type&&) = delete;
 
 public:
     bool resize(size_type n)
     {
         if (n == 0) {
             if (external_buffer()) {
-                dealloc(m_buffer, m_items);
-                m_external = false;
-                m_buffer = &m_internal[0];
+                dealloc(buffer_, items_);
+                external_ = false;
+                buffer_ = &internal_[0];
             }
-            m_items = n;
+            items_ = n;
             return true;
         }
 
-        if (m_items < n) {
+        if (items_ < n) {
             if (external_buffer()) {
-                pointer new_buffer = realloc(m_buffer, m_items, n);
+                pointer new_buffer = realloc(buffer_, items_, n);
                 if (!new_buffer)
                     return false;
-                m_buffer = new_buffer;
+                buffer_ = new_buffer;
             } else {
                 if (space < n) {
                     pointer new_buffer = alloc(n);
                     if (!new_buffer)
                         return false;
-                    block_copy(new_buffer, m_buffer, m_items);
-                    m_buffer = new_buffer;
-                    m_external = true;
+                    block_copy(new_buffer, buffer_, items_);
+                    buffer_ = new_buffer;
+                    external_ = true;
                 } else {
                     // Nothing to do
                 }
@@ -85,26 +85,26 @@ public:
                 // Nothing to do
             }
         }
-        m_items = n;
+        items_ = n;
         return true;
     }
 
     void swap(class_type& rhs)
     {
-        std::swap(this->m_internal, rhs.m_internal);
-        std::swap(this->m_buffer, rhs.m_buffer);
-        std::swap(this->m_items, rhs.m_items);
-        std::swap(this->m_external, rhs.m_external);
+        std::swap(this->internal_, rhs.m_internal);
+        std::swap(this->buffer_, rhs.m_buffer);
+        std::swap(this->items_, rhs.m_items);
+        std::swap(this->external_, rhs.m_external);
     }
 
     bool empty() const
     {
-        return m_items == 0;
+        return items_ == 0;
     }
 
     size_type size() const
     {
-        return m_items;
+        return items_;
     }
 
     static size_type internal_size()
@@ -114,52 +114,54 @@ public:
 
     reference operator[](size_type index)
     {
-        return m_buffer[index];
+        ZYSOFT_ASSERT(index < items_);
+        return buffer_[index];
     }
 
     const_reference operator[](size_type index) const
     {
-        return m_buffer[index];
+        ZYSOFT_ASSERT(index < items_);
+        return buffer_[index];
     }
 
     pointer data()
     {
-        return m_buffer;
+        return buffer_;
     }
 
     const_pointer data() const
     {
-        return m_buffer;
+        return buffer_;
     }
 
     iterator begin()
     {
-        return m_buffer;
+        return buffer_;
     }
 
     iterator end()
     {
-        return m_buffer + m_items;
+        return buffer_ + items_;
     }
 
     const_iterator begin() const
     {
-        return m_buffer;
+        return buffer_;
     }
 
     const_iterator end() const
     {
-        return m_buffer + m_items;
+        return buffer_ + items_;
     }
 
     const_iterator cbegin() const
     {
-        return m_buffer + m_items;
+        return buffer_ + items_;
     }
 
     const_iterator cend() const
     {
-        return m_buffer + m_items;
+        return buffer_ + items_;
     }
 
     reverse_iterator rbegin()
@@ -193,10 +195,10 @@ public:
     }
 
 private:
-    value_type              m_internal[N];
-    pointer                 m_buffer;
-    size_type               m_items;
-    bool                    m_external;
+    value_type              internal_[N];
+    pointer                 buffer_;
+    size_type               items_;
+    bool                    external_;
 
 private:
     pointer alloc(size_type n)
@@ -228,7 +230,7 @@ private:
 
     bool external_buffer() const
     {
-        return m_external;
+        return external_;
     }
 
     static void block_copy(void* s, const void* d, size_type len)
@@ -248,12 +250,12 @@ template< typename T
         , typename A
         >
 inline auto_buffer<T, N, A>::auto_buffer(size_type n)
-    : m_internal()
-    , m_buffer(n < N ? &m_internal[0] : alloc(n))
-    , m_items(m_buffer ? n : 0)
-    , m_external(n > N)
+    : internal_()
+    , buffer_(n < N ? &internal_[0] : alloc(n))
+    , items_(buffer_ ? n : 0)
+    , external_(n >= N)
 {
-    block_fill(m_buffer, m_items);
+    block_fill(buffer_, items_);
 }
 
 template< typename T
@@ -263,7 +265,7 @@ template< typename T
 inline auto_buffer<T, N, A>::~auto_buffer()
 {
     if (external_buffer()) {
-        dealloc(m_buffer, m_items);
+        dealloc(buffer_, items_);
     }
 }
 

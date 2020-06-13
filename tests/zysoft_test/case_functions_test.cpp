@@ -4,22 +4,20 @@
 #include "test_define.h"
 #include "log.h"
 
+#define TEST_CASE_NAME "case functions test"
+
 // TODO 测试宽字符
 
-#if 0
-TEST_CASE("test string case functions")
-{
-    PrintInfo("test string case functions");
-    {
-        std::string sl;
-        std::string su;
-        for (int i = 'a'; i <= 'z'; ++i) {
-            sl.push_back(static_cast<char>(i));
-        }
+static const std::string s_lower = "abcdefghijklmnopqrstuvwxyz";
+static const std::string s_upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-        for (int i = 'A'; i <= 'Z'; ++i) {
-            su.push_back(static_cast<char>(i));
-        }
+static 
+void Test1()
+{
+
+    {
+        std::string sl = s_lower;
+        std::string su = s_upper;
             
         CHECK(sl == zysoft::to_lower(su));
         CHECK(su == zysoft::to_upper(sl));
@@ -58,6 +56,30 @@ TEST_CASE("test string case functions")
                 CHECK(s[i] == su[i]);
             }
         }
+    }
+
+    // 注意：测试std::string_view 以下代码会在编译期出错
+#if 0
+    {
+        std::string sl = s_lower;
+        std::string su = s_upper;
+        std::string_view sl_sv = sl;
+        std::string_view su_sv = su;
+        CHECK(zysoft::to_lower(su_sv) == s_lower);
+        CHECK(zysoft::to_upper(sl_sv) == s_upper);
+    }
+#endif
+}
+
+#if 1
+TEST_CASE(TEST_CASE_NAME)
+{
+    LogInfo << TEST_CASE_NAME;
+    try {
+        Test1();
+    } catch (const std::exception& e) {
+        LogWarn << e.what();
+        CHECK(false);
     }
 }
 #endif
