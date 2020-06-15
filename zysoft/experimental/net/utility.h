@@ -2,8 +2,7 @@
 
 #include <cstdint>
 
-#include <boost/asio.hpp>
-
+#include <zysoft/experimental/net/types.h>
 #include <zysoft/experimental/net/tcp_connection.h>
 #include <zysoft/experimental/net/inet_address.h>
 #include <zysoft/experimental/net/console_log.h>
@@ -89,9 +88,9 @@ void default_message_cb(const tcp_connection_ptr& conn, buffer* b)
 }
 
 inline
-void default_write_complete_cb(const tcp_connection_ptr& conn)
+void default_write_complete_cb(const tcp_connection_ptr& conn, std::size_t len)
 {
-    NET_LOG_TRACE << "Default write complete callback. " << conn->get_name();
+    NET_LOG_TRACE << "Default write complete callback. " << conn->get_name() << " write bytes: " << len;
 }
 
 inline
@@ -101,19 +100,42 @@ void default_close_cb(const tcp_connection_ptr& conn)
 }
 
 inline
-void default_error_cb(const tcp_connection_ptr& conn, const err_code& ecode)
+void default_error_cb(const tcp_connection_ptr& conn, const error_code& ecode)
 {
     NET_LOG_TRACE << "Default error callback. " << conn->get_name() << " error code: " << ecode.value() << " reason: " << ecode.message();
 }
 
 inline
-std::string to_string(const inet_address& addr, int conn_id)
+void default_timeout_cb(const tcp_connection_ptr& conn, timeout_type type, std::uint64_t sec)
+{
+    NET_LOG_TRACE << "Default timeout callback. " << conn->get_name() << " timeout type: " 
+        << (type == timeout_type::read ? "read" : "write")
+        << " seconds: " << sec;
+}
+
+inline
+std::string create_connection_name(const inet_address& addr, int conn_id)
 {
     char buffer[64] = {0};
     snprintf(buffer, sizeof buffer, "%s:%d#%d", addr.ip_.c_str(), static_cast<int>(addr.port_), conn_id);
     return buffer;
 }
 
+inline
+std::string create_connection_name(const inet_address& addr)
+{
+    char buffer[64] = {0};
+    snprintf(buffer, sizeof buffer, "%s:%d", addr.ip_.c_str(), static_cast<int>(addr.port_));
+    return buffer;
+}
+
+inline
+const std::string& to_string(timeout_type t)
+{
+    static const std::string str_read = "read";
+    static const std::string str_write = "write";
+    return t == timeout_type::read ? str_read : str_write;
+}
 
 
 } // namespace util

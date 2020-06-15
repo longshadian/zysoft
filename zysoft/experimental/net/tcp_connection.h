@@ -4,10 +4,8 @@
 #include <list>
 #include <string>
 
-#include <boost/asio.hpp>
-
+#include <zysoft/experimental/net/types.h>
 #include <zysoft/experimental/net/buffer.h>
-#include <zysoft/experimental/net/Types.h>
 #include <zysoft/experimental/net/event_loop.h>
 #include <zysoft/experimental/net/console_log.h>
 
@@ -54,13 +52,7 @@ public:
         OptDoNotMessageCallback     = 0x0004,
     };
 
-    enum class timeout_type
-    {
-        read = 0,
-        write = 1,
-    };
-
-public:
+private:
     tcp_connection(event_loop* loop, std::string conn_name)
         : loop_(loop)
         , conn_name_(std::move(conn_name))
@@ -82,9 +74,12 @@ public:
     {
     }
 
+public:
     ~tcp_connection()
     {
-        connect_cleanup();
+        // 析构函数中不调用cleanup，只执行destroy
+        // 1. cleanup可能会执行回调，回调对象有可能已经失效
+        // 2. destroy只关闭自身持有的socket，此操作是安全的
         connect_destroy();
     }
 
@@ -93,12 +88,19 @@ public:
     tcp_connection(tcp_connection&&) = delete;
     tcp_connection& operator=(tcp_connection&&) = delete;
 
+    static
+    tcp_connection_ptr create(event_loop* loop, std::string conn_name)
+    {
+        auto* pthis = new tcp_connection(loop, std::move(conn_name));
+        return tcp_connection_ptr(pthis);
+    }
+
     void set_connection_callback(connection_callback cb) { connection_cb_ = std::move(cb); } 
-    void set_message_callback(message_callback cb) { message_cb_ = std::move(cb); }
+    void set_read_callback(read_callback cb) { message_cb_ = std::move(cb); }
     void set_write_complete_callback(write_complete_callback cb) { write_complete_cb_ = std::move(cb); }
     void set_cleanup_callback(detail::conn_cleanup_callback cb) { cleanup_cb_ = std::move(cb); }
-    void set_read_timeout_seconds(std::uint32_t sec) { read_timeout_sec_ = sec; }
-    void set_write_timeout_seconds(std::uint32_t sec) { write_timeout_sec_ = sec; }
+    void set_read_timeout_duration(std::uint64_t sec) { read_timeout_sec_ = sec; }
+    void set_write_timeout_duration(std::uint64_t sec) { write_timeout_sec_ = sec; }
 
     const std::string& get_name() const { return conn_name_; }
     event_loop* get_event_loop() { return loop_; }
@@ -262,7 +264,7 @@ private:
         async_read();
     }
 
-    void handle_write(boost::system::error_code ec, std::size_t /* len */)
+    void handle_write(boost::system::error_code ec, std::size_t len)
     {
         assert_run_in_loop();
         buffer msg = std::move(output_buffer_.front());
@@ -273,7 +275,7 @@ private:
         }
         try {
             if (write_complete_cb_) {
-                write_complete_cb_(shared_from_this());
+                write_complete_cb_(shared_from_this(), len);
             }
         } catch (...) {
         }
@@ -287,7 +289,10 @@ private:
             if (flag_ & EFlag::OptShutdown) {
                 if (output_buffer_.empty()) {
                     // 当前无消息可发送，取消异步操作，HandleRead会被执行。
-                    connect_cleanup();
+                    detail::cleanup_context ctx;
+                    ctx.type_ = detail::cleanup_type::activity;
+                    ctx.err_code_ = boost::asio::error::make_error_code(boost::asio::error::eof);
+                    connect_cleanup(ctx);
                 } else {
                     // 还有消息待发送，继续发送。
                     reset_timer(write_timer_);
@@ -312,7 +317,10 @@ private:
         //     此时，socket状态已经处于Closed状态
         // 2.read/write操作返回错误，例如对端主动关闭socket，或者socket read，write出错，进入此函数。
         NET_LOG_TRACE << "Handle Close. " << get_name() << " error code: " << ec.value() << " reason: " << ec.message();
-        connect_cleanup(&ec);
+        detail::cleanup_context ctx;
+        ctx.type_ = detail::cleanup_type::socket_err;
+        ctx.err_code_ = ec;
+        connect_cleanup(ctx);
     }
 
     void handle_timeout(timeout_type type, std::uint64_t sec)
@@ -333,9 +341,13 @@ private:
             write_timer_ = nullptr;
             NET_LOG_TRACE << "write timeout " << get_name() << " sec: " << sec;
         }
+        detail::cleanup_context ctx;
+        ctx.type_ = detail::cleanup_type::timeout;
+        ctx.timeout_type_ = type;
+        ctx.timeout_sec_ = sec;
 
         // 超时后，执行清理操作
-        connect_cleanup(nullptr, true);
+        connect_cleanup(ctx);
     }
 
     void send_impl(buffer&& message)
@@ -372,7 +384,10 @@ private:
         state_ = EState::WaitClose;
         if (output_buffer_.empty()) {
             // 当前无消息待发送，执行清理操作
-            connect_cleanup();
+            detail::cleanup_context ctx;
+            ctx.type_ = detail::cleanup_type::activity;
+            ctx.err_code_ = boost::asio::error::make_error_code(boost::asio::error::eof);
+            connect_cleanup(ctx);
         }
     }
 
@@ -382,7 +397,10 @@ private:
             return;
         }
         // 执行清理操作
-        connect_cleanup();
+        detail::cleanup_context ctx;
+        ctx.type_ = detail::cleanup_type::activity;
+        ctx.err_code_ = boost::asio::error::make_error_code(boost::asio::error::eof);
+        connect_cleanup(ctx);
     }
 
     bool need_message_callback() const
@@ -404,7 +422,7 @@ private:
         }
     }
 
-    void connect_cleanup(const boost::system::error_code* ecode = nullptr, bool timeout = false)
+    void connect_cleanup(detail::cleanup_context& ctx)
     {
         if (state_ == EState::Closed)
             return;
@@ -422,15 +440,8 @@ private:
         // 取消异步操作，handle_read_write_error(如果存在)会被调用。
         boost::system::error_code ec;
         socket_.cancel(ec);
-        if (!ecode) {
-            ec = boost::asio::error::make_error_code(boost::asio::error::operation_aborted);
-            ecode = &ec;
-        }
-        if (timeout) {
-            cleanup_cb_(shared_from_this(), ecode, false);
-        } else {
-            cleanup_cb_(shared_from_this(), ecode, need_message_callback());
-        }
+        ctx.call_error_cb_ = need_message_callback();
+        cleanup_cb_(shared_from_this(), ctx);
     }
 
 private:
@@ -445,7 +456,7 @@ private:
     bool                        is_cleaned_;
 
     connection_callback             connection_cb_;
-    message_callback                message_cb_;
+    read_callback                message_cb_;
     write_complete_callback         write_complete_cb_;
     detail::conn_cleanup_callback   cleanup_cb_;
 

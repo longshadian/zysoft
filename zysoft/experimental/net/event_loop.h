@@ -5,8 +5,7 @@
 #include <functional>
 #include <thread>
 
-#include <boost/asio.hpp>
-
+#include <zysoft/experimental/net/types.h>
 #include <zysoft/experimental/net/timer_queue.h>
 #include <zysoft/experimental/net/console_log.h>
 

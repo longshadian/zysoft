@@ -8,6 +8,11 @@
 // Official repository: https://github.com/boostorg/static_string
 //
 
+//
+// static_string实现参考了boost.static_string。
+//
+// 
+
 #include <zysoft/zysoft/zysoft.h>
 
 #include <algorithm>

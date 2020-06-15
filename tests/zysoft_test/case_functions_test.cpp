@@ -58,6 +58,38 @@ void Test1()
         }
     }
 
+    // 其他容器
+    {
+        {
+            std::array<char, 3> arr_lower = {'a', 'b', 'c'};
+            std::array<char, 3> arr_upper = {'A', 'B', 'C'};
+            CHECK(zysoft::to_lower(arr_upper) == arr_lower);
+            CHECK(zysoft::to_upper(arr_lower) == arr_upper);
+
+            std::array<char, 3> arr_lower_1 = arr_lower;
+            std::array<char, 3> arr_upper_1 = arr_upper;
+            CHECK(zysoft::make_upper(arr_lower_1) == arr_upper);
+            CHECK(zysoft::make_lower(arr_lower_1) == arr_lower);
+            CHECK(zysoft::make_upper(arr_upper_1) == arr_upper);
+            CHECK(zysoft::make_lower(arr_upper_1) == arr_lower);
+        }
+
+        {
+            std::vector<char> vec_lower(s_lower.begin(), s_lower.end());
+            std::vector<char> vec_upper(s_upper.begin(), s_upper.end());
+            CHECK(zysoft::to_lower(vec_upper) == vec_lower);
+            CHECK(zysoft::to_upper(vec_lower) == vec_upper);
+
+            std::vector<char> vec_lower_1 = vec_lower;
+            std::vector<char> vec_upper_1 = vec_upper;
+            CHECK(zysoft::make_upper(vec_lower_1) == vec_upper);
+            CHECK(zysoft::make_lower(vec_lower_1) == vec_lower);
+            CHECK(zysoft::make_upper(vec_upper_1) == vec_upper);
+            CHECK(zysoft::make_lower(vec_upper_1) == vec_lower);
+        }
+    }
+
+
     // 注意：测试std::string_view 以下代码会在编译期出错
 #if 0
     {

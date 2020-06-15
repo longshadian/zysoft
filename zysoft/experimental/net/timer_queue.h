@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/asio.hpp>
-
 #include <zysoft/zysoft/timer/timing_wheel.h>
 
 #include <zysoft/experimental/net/tcp_connection.h>
