@@ -1,9 +1,11 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_MEMORY_ALLOCATOR_BASE_H
+#define _ZYSOFT_ZYSOFT_MEMORY_ALLOCATOR_BASE_H
 
 #include <cstddef>
-#include <limits>
 #include <exception>
+#include <limits>
 
+#include <zysoft/zysoft_fwd.h>
 
 namespace zysoft
 {
@@ -44,4 +46,4 @@ public:
 
 } // namespace zysoft
 
-
+#endif // !_ZYSOFT_ZYSOFT_MEMORY_ALLOCATOR_BASE_H

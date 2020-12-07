@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_RANDOM_H
+#define _ZYSOFT_ZYSOFT_RANDOM_H
 
 #include <ctime>
 #include <random>
@@ -46,22 +47,6 @@ public:
         std::shuffle(first, last, m_engine);
     }
 
-    std::string gen_rand_str(std::size_t size) 
-    {
-        static const std::string VALID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        std::string str(size, '\0');
-        std::generate(std::begin(str), std::end(str), [&]() { return VALID_CHARS[rand(VALID_CHARS.size() - 1)]; });
-        return str;
-    }
-
-    void gen_rand_data(void* data, std::size_t size)
-    {
-        std::uint8_t* p = reinterpret_cast<std::uint8_t*>(data);
-        for (std::size_t i = 0; i != size; ++i) {
-            p[i] = rand(0, 0xFF);
-        }
-    }
-
     E& internal_engine() { return m_engine; }
     const E& internal_engine() const { return m_engine; }
 private:
@@ -70,6 +55,24 @@ private:
 
 using default_random = random<std::default_random_engine>;
 
+template <typename E>
+inline std::string gen_rand_str(random<E>& r, std::size_t size) 
+{
+    static const std::string VALID_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    std::string str(size, '\0');
+    std::generate(std::begin(str), std::end(str), [&]() { return VALID_CHARS[r.rand(VALID_CHARS.size() - 1)]; });
+    return str;
+}
+
+template <typename E>
+inline void gen_rand_binary(random<E>& r, void* data, std::size_t size)
+{
+    std::uint8_t* p = reinterpret_cast<std::uint8_t*>(data);
+    for (std::size_t i = 0; i != size; ++i) {
+        p[i] = r.rand(0, 0xFF);
+    }
+}
+
 } // namepsace zysoft
 
-
+#endif // !_ZYSOFT_ZYSOFT_RANDOM_H

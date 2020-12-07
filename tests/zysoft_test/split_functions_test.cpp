@@ -8,12 +8,12 @@
 
 static void Test_1()
 {
-    PrintInfo("test string split functions");
+    //PrintInfo("test string split functions");
     {
         std::string src = "192.168";
         std::string s1, s2;
         auto n = zysoft::split(src, '.', s1, s2);
-        CHECK(n == 1);
+        CHECK(n == 2);
         CHECK(s1 == "192");
         CHECK(s2 == "168");
     }
@@ -68,7 +68,7 @@ static void Test_2()
         std::string src = "192.168.123";
         std::string s1, s2;
         auto n = zysoft::split(src, '.', s1, s2);
-        CHECK(n == 1);
+        CHECK(n == 2);
         CHECK(s1 == "192");
         CHECK(s2 == "168.123");
     }
@@ -92,7 +92,7 @@ static void Test_2()
     {
         std::string s1, s2;
         auto n = zysoft::split(".abc", '.', s1, s2);
-        CHECK(n == 1);
+        CHECK(n == 2);
         CHECK(s1 == "");
         CHECK(s2 == "abc");
     }
@@ -100,7 +100,7 @@ static void Test_2()
     {
         std::string s1, s2;
         auto n = zysoft::split(".abc.123", '.', s1, s2);
-        CHECK(n == 1);
+        CHECK(n == 2);
         CHECK(s1 == "");
         CHECK(s2 == "abc.123");
     }
@@ -108,20 +108,33 @@ static void Test_2()
     {
         std::string s1, s2;
         auto n = zysoft::split("....a.bc.123...", '.', s1, s2);
-        CHECK(n == 1);
+        CHECK(n == 2);
         CHECK(s1 == "");
         CHECK(s2 == "...a.bc.123...");
     }
 
 }
 
-#if 0
+static void Test_3()
+{
+    PrintInfo("test string split functions void");
+    {
+        char c = '.';
+        std::string src = ".1..2.";
+        auto cnt = std::count(src.begin(), src.end(), c);
+        std::vector<std::string> vec = zysoft::str_split(src, '.');
+        (void)vec;
+    }
+}
+
+#if 1
 TEST_CASE("test string split functions")
 {
     PrintInfo("test string split functions");
     try {
         Test_1();
         Test_2();
+        Test_3();
     } catch (const std::exception& e) {
         std::cout << e.what() << "\n";
         CHECK(false);

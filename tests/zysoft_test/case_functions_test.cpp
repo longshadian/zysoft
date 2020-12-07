@@ -1,3 +1,5 @@
+#include <array>
+
 #include <zysoft/zysoft/string/case_functions.h>
 #include "../doctest/doctest.h"
 

@@ -1,7 +1,7 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_MEMORY_NULL_ALLOCATOR_H
+#define _ZYSOFT_ZYSOFT_MEMORY_NULL_ALLOCATOR_H
 
-#include <zysoft/zysoft/zysoft.h>
-#include <zysoft/zysoft/memory/allocator_base.h>
+#include <zysoft/zysoft.h>
 
 namespace zysoft
 {
@@ -47,4 +47,5 @@ private:
 
 } // namespace zysoft
 
+#endif // !_ZYSOFT_ZYSOFT_MEMORY_NULL_ALLOCATOR_H
 

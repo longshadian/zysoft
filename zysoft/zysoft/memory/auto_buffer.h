@@ -1,10 +1,12 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_MEMORY_AUTO_BUFFER_H
+#define _ZYSOFT_ZYSOFT_MEMORY_AUTO_BUFFER_H
 
 #include <cstddef>
+#include <cstring>
 #include <memory>
 #include <type_traits>
 
-#include <zysoft/zysoft/zysoft.h>
+#include <zysoft/zysoft/memory/allocator_base.h>
 #include <zysoft/zysoft/memory/util/allocator_selector.h>
 
 namespace zysoft
@@ -35,7 +37,7 @@ public:
     typedef std::reverse_iterator<T>                reverse_iterator;
     typedef const reverse_iterator                  const_reverse_iterator;
 
-    static_assert(std::is_pod_v<T>, "auto_buffer T must be POD!");
+    static_assert(std::is_pod<T>::value, "auto_buffer T must be POD!");
     static_assert(N != 0, "auto_buffer N != 0");
 public:
 
@@ -271,3 +273,5 @@ inline auto_buffer<T, N, A>::~auto_buffer()
 
 } // namespace zysoft
 
+
+#endif // !_ZYSOFT_ZYSOFT_MEMORY_AUTO_BUFFER_H

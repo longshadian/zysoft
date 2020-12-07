@@ -1,4 +1,5 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_TIMER_TIMEING_WHEEL_H
+#define _ZYSOFT_ZYSOFT_TIMER_TIMEING_WHEEL_H
 
 #include <algorithm>
 #include <array>
@@ -148,7 +149,7 @@ public:
 
             e->tick_ = e->duration_ + current_tick;
             s = get_slot(e);
-            s->entries_.insert(std::pair(e->tick_, e));
+            s->entries_.insert(std::pair<decltype(e->tick_), decltype(e)>{e->tick_, e});
         }
         assert(all_entries_.size() == wheel_entries_count() + immediate_entries_.size());
     }
@@ -187,7 +188,7 @@ private:
         std::uint64_t index = (duration + current_tick) % static_capacity;
         slot* s = wheel_[index].get();
         auto e = std::make_shared<entry>(new_tick, duration, std::forward<TT>(v));
-        s->entries_.insert(std::pair(e->tick_, e));
+        s->entries_.insert(std::pair<decltype(e->tick_), decltype(e)>(e->tick_, e));
         all_entries_.insert(e);
         assert(all_entries_.size() == wheel_entries_count() + immediate_entries_.size());
         return wheel_handle{e};
@@ -217,7 +218,7 @@ private:
 
     static const entry* slot_remove_entry(slot* s, const entry_ptr& p)
     {
-        std::multimap<std::uint64_t, entry_ptr>::iterator it = s->entries_.end();
+        auto it = s->entries_.end();
         auto it_pair = s->entries_.equal_range(p->tick_);
         for (auto i = it_pair.first; i != it_pair.second; ++i) {
             if (i->second == p) {
@@ -239,4 +240,6 @@ private:
 };
 
 } // namespace zysoft
+
+#endif // !_ZYSOFT_ZYSOFT_TIMER_TIMEING_WHEEL_H
 

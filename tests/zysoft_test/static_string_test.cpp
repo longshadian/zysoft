@@ -1,5 +1,6 @@
 #include "../doctest/doctest.h"
 
+#if 0
 #include "test_define.h"
 #include "log.h"
 
@@ -24,6 +25,7 @@ static void Test_Print()
     zysoft::static_string<3> s;
     print_static_string(s);
 }
+#endif
 
 #if 0
 TEST_CASE("test static_string")

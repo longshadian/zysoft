@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zysoft/zysoft/console_log.h>
+#include "../common/console_log.h"
 
 #define PrintDebug  CONSOLE_PRINT_DEBUG
 #define PrintInfo   CONSOLE_PRINT_INFO

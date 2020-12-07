@@ -1,9 +1,12 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_STRING_SPLI_FUNCTIONS_H
+#define _ZYSOFT_ZYSOFT_STRING_SPLI_FUNCTIONS_H
 
 #include <algorithm>
 #include <cstddef>
+#include <vector>
+#include <sstream>
 
-#include <zysoft/zysoft/zysoft.h>
+#include <zysoft/zysoft_fwd.h>
 #include <zysoft/zysoft/shims/access/string.h>
 
 namespace zysoft
@@ -15,7 +18,7 @@ namespace detail
 template< typename S
         , typename C
         >
-inline bool
+inline std::size_t
 split_impl(
     const C*    s
 ,   std::size_t n
@@ -26,15 +29,20 @@ split_impl(
 {
     const C* const  b   =   s;
     const C* const  e   =   s + n;
-    const C*        it  =   std::find(b, e, delim);
+    const C*        it0 =   b;
+    const C*        it1 =   std::find(it0, e, delim);
+    std::size_t     cnt =   (it1 != e) ? 1 : 0;
+    s0 = S(it0, it1);
 
-    s0 = S(b, it);
-    if (e == it) {
-        return false;
+    if (e != it1) {
+        ++cnt;
+        it0 = ++it1;
+        it1 = e;
+    } else {
+        it0 = it1;
     }
-    ++it;
-    s1 = S(it, e);
-    return true;
+    s1 = S(it0, it1);
+    return cnt;
 }
 
 template< typename S
@@ -403,5 +411,21 @@ split(
     return detail::split_impl(c_str_data(s), c_str_len(s), delim, s0, s1, s2, s3, s4, s5);
 }
 
+inline std::vector<std::string> str_split(const std::string& s, char c)
+{
+    std::vector<std::string> out;
+    if (s.empty())
+        return out;
+
+    std::istringstream istm(s);
+    std::string temp;
+    while (std::getline(istm, temp, c)) {
+        out.push_back(temp);
+    }
+    return out;
+}
+
 } // namespace zysoft
+
+#endif // !_ZYSOFT_ZYSOFT_STRING_SPLI_FUNCTIONS_H
 

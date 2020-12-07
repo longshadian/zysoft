@@ -1,7 +1,9 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_SHIMS_ACCESS_STRING_H
+#define _ZYSOFT_ZYSOFT_SHIMS_ACCESS_STRING_H
 
-#include <string>
 #include <cstddef>
+#include <cstring>
+#include <string>
 
 namespace zysoft
 { 
@@ -43,3 +45,4 @@ inline std::size_t c_str_len(const std::wstring& s)
 
 } // namespace zysoft
 
+#endif // !_ZYSOFT_ZYSOFT_SHIMS_ACCESS_STRING_H

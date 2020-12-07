@@ -1,8 +1,9 @@
-#pragma once
+#ifndef _ZYSOFT_ZYSOFT_MEMORY_UTIL_ALLOCATOR_SELECTOR_H
+#define _ZYSOFT_ZYSOFT_MEMORY_UTIL_ALLOCATOR_SELECTOR_H
 
 #include <memory>
 
-#include <zysoft/zysoft/zysoft.h>
+#include <zysoft/zysoft_fwd.h>
 
 namespace zysoft
 {
@@ -23,4 +24,4 @@ struct allocator_selector
 
 } // namespace zysoft
 
-
+#endif // !_ZYSOFT_ZYSOFT_MEMORY_UTIL_ALLOCATOR_SELECTOR_H

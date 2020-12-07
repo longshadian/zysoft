@@ -41,11 +41,12 @@ void Test1()
         zysoft::auto_buffer<std::int8_t, 10> ab{1};
         CHECK(ab.resize(10));
     }
-    {
-        // 以定义会导致编译期错误
-        // zysoft::auto_buffer<std::string, 1> ab1{0};
-        // zysoft::auto_buffer<int, 0> ab2{0};
-    }
+
+#if 0
+        // 以下定义会导致编译期错误
+        zysoft::auto_buffer<std::string, 1> ab1{0};
+        zysoft::auto_buffer<int, 0> ab2{0};
+#endif
 }
 
 #if 1
@@ -56,7 +57,7 @@ TEST_CASE(TEST_CASE_NAME)
         Test1();
     } catch (const std::exception& e) {
         LogWarn << e.what();
-        CHECK(false);
+        CHECK(0);
     }
 }
 #endif
