@@ -35,10 +35,10 @@ inline void bzero(T* t)
 }
 
 template <typename E>
-inline std::underlying_type_t<E> enum_value(E e)
+inline typename std::underlying_type<E>::type enum_value(E e)
 {
     //static_assert(std::is_enum<E>::value, "E must be enum or enum class !");
-    return static_cast<std::underlying_type_t<E>>(e);
+    return static_cast<typename std::underlying_type<E>::type>(e);
 }
 
 std::string cat_file(const char* f);

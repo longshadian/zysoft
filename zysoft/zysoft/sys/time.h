@@ -10,7 +10,7 @@ namespace zysoft
 
 inline void gmtime(const std::time_t* t, struct tm* output)
 {
-#if defined(ZYSOFT_MSVC)
+#if ZYSOFT_MSVC
     ::gmtime_s(output, t);
 #else
     ::gmtime_r(t, output);
@@ -19,7 +19,7 @@ inline void gmtime(const std::time_t* t, struct tm* output)
 
 inline void gettimeofday(struct timeval* tp)
 {
-#if defined(ZYSOFT_MSVC)
+#if ZYSOFT_MSVC
     std::uint64_t intervals;
     FILETIME ft;
     ::GetSystemTimeAsFileTime(&ft);
@@ -49,7 +49,7 @@ inline void gettimeofday(struct timeval* tp)
 
 inline struct tm* localtime(const time_t* t, struct tm* output)
 {
-#if defined(ZYSOFT_MSVC)
+#if ZYSOFT_MSVC
     ::localtime_s(output, t);
 #else
     ::localtime_r(t, output);
