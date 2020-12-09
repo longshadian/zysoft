@@ -28,13 +28,13 @@ public:
 
     void reset()
     {
-        start_ = T::now();
+        start_ = clock_type::now();
         end_ = start_;
     }
 
     void stop()
     {
-        end_ = T::now();
+        end_ = clock_type::now();
     }
 
     template <typename D>
@@ -62,8 +62,62 @@ public:
     time_point_type end_;
 };
 
-using steady_timer = clock_timer<std::chrono::steady_clock>;
+using steady_performace_timer = clock_timer<std::chrono::steady_clock>;
 
+template <typename T>
+class basic_timer
+{
+public:
+    using Duration = T;
+
+public:
+    basic_timer() = default;
+    ~basic_timer() = default;
+    basic_timer(const basic_timer&) = default;
+    basic_timer& operator=(const basic_timer&) = default;
+
+    template <typename D>
+    explicit basic_timer(D d)
+        : flag_(), start_(), expire_(d)
+    {
+    }
+
+    void update(Duration delta)
+    {
+        start_ += delta;
+    }
+
+    bool passed() const
+    {
+        return expire_ <= start_;
+    }
+
+    void reset()
+    {
+        start_ = Duration::zero();
+        flag_ = 0;
+    }
+
+    Duration remain() const
+    {
+        return expire_ - start_;
+    }
+
+    void flag(std::int64_t flag)
+    {
+        flag_ = flag;
+    }
+
+    std::int64_t flag() const
+    {
+        return flag_;
+    }
+
+    std::int64_t    flag_;
+    Duration        start_;
+    Duration        expire_;
+};
+using milliseconds_timer = basic_timer<std::chrono::milliseconds>;
 
 } // namespace zysoft
 

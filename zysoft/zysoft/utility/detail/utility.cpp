@@ -1,6 +1,13 @@
-#include <zysoft/zysoft/utility/utility.h>
+#include <zysoft/zysoft_fwd.h>
+#include <cstring>
+#include <type_traits>
+#include <memory>
+#include <cstdio>
+#include <sstream>
 
+#include <zysoft/zysoft/utility/utility.h>
 #include <zysoft/zysoft/sys/sys.h>
+#include <zysoft/zysoft/time/time.h>
 
 namespace zysoft
 {
@@ -21,6 +28,49 @@ std::string cat_file(const char* f)
     }
     std::fclose(fp);
     return content;
+}
+
+void filter_comment(const std::string& src, std::string& dst)
+{
+    std::istringstream istm{src};
+    std::ostringstream ostm{};
+    std::string str;
+    bool comment = false;
+    while (!istm.eof()) {
+        std::getline(istm, str);
+        comment = false;
+        for (const auto& c : str) {
+            if (::isblank(c))
+                continue;
+            comment = c == '#';
+            break;
+        }
+        if (!comment)
+            ostm << str << "\n";
+    }
+    dst = ostm.str();
+}
+
+std::int64_t unix_time_milliseconds(const struct timeval* tv)
+{
+    if (tv) {
+        return std::int64_t(tv->tv_sec)*1000 + std::int64_t(tv->tv_usec)/1000;
+    }
+    struct timeval tmp{};
+    gettimeofday(&tmp);
+    tv = &tmp;
+    return std::int64_t(tv->tv_sec)*1000 + std::int64_t(tv->tv_usec)/1000;
+}
+
+std::int64_t unix_time_microseconds(const struct timeval* tv)
+{
+    if (tv) {
+        return std::int64_t(tv->tv_sec)*1000000 + std::int64_t(tv->tv_usec);
+    }
+    struct timeval tmp{};
+    gettimeofday(&tmp);
+    tv = &tmp;
+    return std::int64_t(tv->tv_sec)*1000000 + std::int64_t(tv->tv_usec);
 }
 
 std::int32_t cat_file(const std::string& path, std::string* out)
