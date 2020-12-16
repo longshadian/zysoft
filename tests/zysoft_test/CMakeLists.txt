@@ -14,7 +14,7 @@ if(TRUE)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR}/release/lib)
 endif()
 
-#### cmakeƒ£øÈ
+#### cmakeÊ®°Âùó
 set(CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/cmake" ${CMAKE_MODULE_PATH})
 include(Functions)
 include_directories(${CMAKE_HOME_DIRECTORY})
