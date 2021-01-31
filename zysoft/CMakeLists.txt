@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
-set(CMAKE_PROJECT_NAME zysoft)
-message("------------> CMAKE_PROJECT_NAME: ${CMAKE_PROJECT_NAME}")
-project(${CMAKE_PROJECT_NAME})
 
+set(CMAKE_PROJECT_NAME zysoft)
+project(${CMAKE_PROJECT_NAME})
 
 message(STATUS "CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 if(TRUE)
@@ -29,40 +28,24 @@ util_auto_source_group(zysoft ${SRC_DIR} ${SRC_CPP_FILES} ${SRC_H_FILES} ${SRC_H
 #include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_HOME_DIRECTORY})
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS false)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
-    #add_definitions("/std:c++11")
+    #add_definitions("/std:c++17")
     add_definitions("/D _WIN32_WINNT=0x0601")
-    #add_definitions("/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS")
+    add_definitions("/D _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS")
     #add_definitions("/D _CRT_SECURE_NO_WARNINGS")
     add_definitions("/utf-8")     ### utf-8 no-bom warning C4819: 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+
 endif()
 
-#link_libraries(ws2_32 wsock32)
-#add_executable(${CMAKE_PROJECT_NAME} ${SRC_FILES} ${SRC_HFILES} ${SRC_HPPFILES})
-#target_link_libraries(${project_name}  wsock32)
 add_library(${CMAKE_PROJECT_NAME} ${SRC_CPP_FILES} ${SRC_H_FILES} ${SRC_HPP_FILES})
-#target_include_directories(zysoft PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
-install(TARGETS zysoft  
-        EXPORT MyLibTargets 
-        LIBRARY DESTINATION lib  # 动态库安装路径
-        ARCHIVE DESTINATION lib  # 静态库安装路径
-        RUNTIME DESTINATION bin  # 可执行文件安装路径
-        PUBLIC_HEADER DESTINATION include  # 头文件安装路径
-    )
-
-#[[
-install(FILES ${SRC_H_FILES}
-    DESTINATION include
-)
-#]]
-
-##[[
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/zysoft/zysoft
+install(TARGETS zysoft  DESTINATION lib)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/zysoft
     DESTINATION "include"
-    FILES_MATCHING PATTERN "*.h"
+    FILES_MATCHING REGEX  "[^/.]+.(h|hpp)$"
 )
-#]]
-
