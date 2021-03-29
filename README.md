@@ -8,3 +8,10 @@ windows上编译依赖vcpkg，具体目录为c:/vcpkg
 通过cmake提供编译选项，允许用户选择zysoft部分组件。
 
 test merge from dev
+
+```
+cd zysoft
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=MY_LIBS_PATH
+```
